@@ -1,0 +1,130 @@
+# 🏭 Simulador de Capacidade e Programação de Produção
+
+**MVP v1.0** — Corte a Laser & Prensa Hotstamp
+
+-----
+
+## Estrutura de Pastas
+
+```
+simulador_producao/
+├── app.py                  # Aplicação principal Streamlit
+├── requirements.txt        # Dependências Python
+├── planilha_modelo.xlsx    # Planilha de exemplo para testes
+└── README.md               # Este arquivo
+```
+
+-----
+
+## Pré-requisitos
+
+- Python 3.10+
+- pip
+
+-----
+
+## Como Rodar Localmente
+
+```bash
+# 1. Clone ou extraia a pasta
+cd simulador_producao
+
+# 2. (Opcional, mas recomendado) Crie um ambiente virtual
+python -m venv .venv
+source .venv/bin/activate        # Linux/macOS
+.venv\Scripts\activate           # Windows
+
+# 3. Instale as dependências
+pip install -r requirements.txt
+
+# 4. Inicie a aplicação
+streamlit run app.py
+```
+
+O browser abrirá automaticamente em `http://localhost:8501`.
+
+-----
+
+## Como Usar
+
+1. Faça upload da planilha Excel no painel lateral.
+1. O sistema valida automaticamente abas e colunas.
+1. O dashboard exibe métricas, gráficos e tabelas em tempo real.
+1. Clique em **Baixar Excel Processado** para exportar os resultados.
+
+-----
+
+## Planilha Obrigatória
+
+|Aba        |Finalidade                           |
+|-----------|-------------------------------------|
+|Recursos   |Máquinas disponíveis e parâmetros    |
+|Produtos   |Cadastro de itens com tipo de demanda|
+|Roteiros   |Tempo de ciclo e recurso por produto |
+|Demandas   |Ordens de produção abertas           |
+|Calendario |Capacidade líquida por recurso/dia   |
+|Programacao|Sequenciamento existente             |
+|Dashboard  |Aba de saída (usada no cálculo final)|
+
+-----
+
+## Regras de Cálculo
+
+```
+Carga de produção (min) = Quantidade × Tempo de ciclo (s) ÷ 60 ÷ Rendimento
+Carga total (min)       = Carga de produção + Setup (min)
+Capacidade líquida (min)= Minutos disponíveis − Paradas planejadas − Minutos perdidos
+Utilização (%)          = Carga total ÷ Capacidade líquida × 100
+Status                  = "Sobrecarga" se Carga total > Capacidade líquida; senão "OK"
+```
+
+**Rota escolhida:** para produtos com múltiplos recursos permitidos, o sistema seleciona automaticamente o recurso com **menor Tempo de ciclo (s)**.
+
+-----
+
+## Versão 2 — Roadmap Sugerido
+
+### Funcionalidades Planejadas
+
+#### Priorização de Ordens
+
+- Ordenação automática por Prioridade + Data de necessidade + Cliente
+- Regras configuráveis: EDD (Earliest Due Date), SPT (Shortest Processing Time), Critical Ratio
+- Trava de ordens internas como abastecimento prioritário de linhas
+
+#### Abastecimento Interno
+
+- Identificação automática de ordens com `Destino = Linha-X`
+- Reserva de capacidade por linha interna antes de alocar externas
+- Alerta quando linha interna pode atrasar por falta de peça
+
+#### Sequenciamento Automático
+
+- Geração da aba `Programacao` automaticamente a partir das demandas priorizadas
+- Algoritmo de bin-packing por recurso (respeita capacidade líquida do calendário)
+- Janelas de setup reduzido para famílias de produtos consecutivas
+- Visualização de Gantt interativo por recurso
+
+#### Simulação What-If
+
+- Slider de capacidade extra por recurso (hora extra, terceiros)
+- Simulação de nova demanda urgente e impacto no restante da fila
+- Comparar cenários lado a lado
+
+#### Alertas e Exportação Avançada
+
+- Envio de resumo por e-mail (integração SMTP)
+- Export PDF do dashboard executivo
+- Histórico de simulações em banco SQLite local
+
+-----
+
+## Dependências
+
+```
+streamlit>=1.32.0
+pandas>=2.2.0
+openpyxl>=3.1.2
+plotly>=5.20.0
+xlsxwriter>=3.2.0
+```
